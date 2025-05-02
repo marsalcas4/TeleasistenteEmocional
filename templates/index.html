@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detector de Emociones</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px; }
+        #resultado { margin-top: 20px; font-size: 18px; color: #333; }
+    </style>
+</head>
+<body>
+    <h1>🎙️ Detector de Emociones por Voz</h1>
+    <button id="grabar">🎧 Empezar grabación</button>
+    <button id="detener" disabled>⏹️ Detener y enviar</button>
+    <p id="resultado">Resultado: —</p>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const grabarBtn = document.getElementById('grabar');
+        const detenerBtn = document.getElementById('detener');
+        const resultadoP = document.getElementById('resultado');
+
+        grabarBtn.onclick = async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = enviarAudio;
+
+            mediaRecorder.start();
+            grabarBtn.disabled = true;
+            detenerBtn.disabled = false;
+            resultadoP.textContent = 'Grabando...';
+        };
+
+        detenerBtn.onclick = () => {
+            mediaRecorder.stop();
+            grabarBtn.disabled = false;
+            detenerBtn.disabled = true;
+            resultadoP.textContent = 'Procesando...';
+        };
+
+        function enviarAudio() {
+            const blob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', blob, 'grabacion.wav');
+
+            fetch('http://127.0.0.1:5000/prediccion', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                resultadoP.textContent = 'Resultado: ' + data.emocion_detectada;
+            })
+            .catch(err => {
+                console.error(err);
+                resultadoP.textContent = '❌ Error al enviar audio.';
+            });
+        }
+    </script>
+</body>
+</html>
