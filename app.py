@@ -33,13 +33,28 @@ ultima_emocion_detectada = None
 
 import requests
 
-def lanzar_monkey_trigger():
-    url = "https://api-v2.voicemonkey.io/trigger?token=1806d0d32cdbe252c28f2a04991d0ff1_a0c9a2824a787b73a34068bccc2a454f&device=estadofelicidad"
+def lanzar_monkey_trigger(emocion):
+    # Normaliza la emoción para que coincida con los nombres de los triggers
+    emocion = emocion.lower()
+    nombre_dispositivo = f"estado{emocion}"
+
+    url = f"https://api-v2.voicemonkey.io/trigger?token=1806d0d32cdbe252c28f2a04991d0ff1_a0c9a2824a787b73a34068bccc2a454f&device={nombre_dispositivo}"
+    
     try:
         response = requests.get(url)
-        print("Voice Monkey response:", response.status_code, response.text)
+        print(f"Voice Monkey triggered for '{emocion}': {response.status_code} - {response.text}")
     except Exception as e:
         print("Error durante la solicitud:", e)
+
+
+
+#def lanzar_monkey_trigger():
+#    url = "https://api-v2.voicemonkey.io/trigger?token=1806d0d32cdbe252c28f2a04991d0ff1_a0c9a2824a787b73a34068bccc2a454f&device=estadofelicidad"
+#    try:
+#        response = requests.get(url)
+#        print("Voice Monkey response:", response.status_code, response.text)
+#    except Exception as e:
+#        print("Error durante la solicitud:", e)
 
 
 @app.route('/')
@@ -141,7 +156,9 @@ def prediccion():
     ultima_emocion_detectada = emocion_predicha
 
     # lanza el trigger para que Alexa suene
-    lanzar_monkey_trigger()
+    #lanzar_monkey_trigger()
+    lanzar_monkey_trigger(emocion_predicha)
+
     
     return jsonify({"emocion_detectada": emocion_predicha}), 200
 
