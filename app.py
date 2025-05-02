@@ -8,6 +8,10 @@ import scipy.stats
 # Crear la app de Flask
 app = Flask(__name__)
 
+# Activa CORS
+from flask_cors import CORS
+CORS(app)
+
 # Cargar el modelo y el scaler previamente entrenados
 modelo_rf = joblib.load("modelo_rf.pkl")
 scaler = joblib.load("scaler.pkl")

@@ -49,7 +49,7 @@
             const formData = new FormData();
             formData.append('audio', blob, 'grabacion.wav');
 
-            fetch('http://127.0.0.1:5000/prediccion', {
+            fetch('https://teleasitente-emocional-160fa0a443c4.herokuapp.com/prediccion', {           
                 method: 'POST',
                 body: formData
             })
