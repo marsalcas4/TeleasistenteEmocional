@@ -30,11 +30,11 @@ diccionario_emociones = {
 # Variable global
 ultima_emocion_detectada = None
 
+
 import requests
 
-# Función para lanzar el triguer, token API v2 
 VOICE_MONKEY_TOKEN = "1806d0d32cdbe252c28f2a04991d0ff1_a0c9a2824a787b73a34068bccc2a454f"
-MONKEY_NAME = "felicidaddetectada"  # o el nombre exacto del Monkey creado
+MONKEY_NAME = "estadofelicidad"  # El nombre exacto del Monkey
 
 def lanzar_monkey_trigger():
     url = f"https://api.voicemonkey.io/trigger"
@@ -45,9 +45,12 @@ def lanzar_monkey_trigger():
     data = {
         "monkey": MONKEY_NAME
     }
-    response = requests.post(url, json=data, headers=headers)
-    print("Voice Monkey response:", response.status_code, response.text)
-
+    try:
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()  # Esto ayudará a detectar errores de respuesta HTTP
+        print("Voice Monkey response:", response.status_code, response.text)
+    except requests.exceptions.RequestException as e:
+        print(f"Error durante la solicitud: {e}")
 
 @app.route('/')
 def home():
