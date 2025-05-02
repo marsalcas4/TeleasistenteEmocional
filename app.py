@@ -33,24 +33,14 @@ ultima_emocion_detectada = None
 
 import requests
 
-VOICE_MONKEY_TOKEN = "1806d0d32cdbe252c28f2a04991d0ff1_a0c9a2824a787b73a34068bccc2a454f"
-MONKEY_NAME = "estadofelicidad"  # El nombre exacto del Monkey
-
 def lanzar_monkey_trigger():
-    url = f"https://api.voicemonkey.io/trigger"
-    headers = {
-        "Authorization": f"Bearer {VOICE_MONKEY_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "monkey": MONKEY_NAME
-    }
+    url = "https://api-v2.voicemonkey.io/trigger?token=1806d0d32cdbe252c28f2a04991d0ff1_a0c9a2824a787b73a34068bccc2a454f&device=estadofelicidad"
     try:
-        response = requests.post(url, json=data, headers=headers)
-        response.raise_for_status()  # Esto ayudará a detectar errores de respuesta HTTP
+        response = requests.get(url)
         print("Voice Monkey response:", response.status_code, response.text)
-    except requests.exceptions.RequestException as e:
-        print(f"Error durante la solicitud: {e}")
+    except Exception as e:
+        print("Error durante la solicitud:", e)
+
 
 @app.route('/')
 def home():
