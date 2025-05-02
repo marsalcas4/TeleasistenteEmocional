@@ -147,10 +147,9 @@ def prediccion():
     global ultima_emocion_detectada
     ultima_emocion_detectada = emocion_predicha
 
-    # Si es felicidad, lanza el trigger para que Alexa suene
-    if emocion_predicha == "felicidad":
-        lanzar_monkey_trigger()
-
+    # lanza el trigger para que Alexa suene
+    lanzar_monkey_trigger()
+    
     return jsonify({"emocion_detectada": emocion_predicha}), 200
 
 @app.route('/ultima_emocion', methods=['GET'])
