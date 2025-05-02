@@ -12,4 +12,4 @@ soundfile
 joblib
 matplotlib
 seaborn
-tensorflow==2.15.0
+tensorflow==2.11.0
