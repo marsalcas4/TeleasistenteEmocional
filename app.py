@@ -30,6 +30,25 @@ diccionario_emociones = {
 # Variable global
 ultima_emocion_detectada = None
 
+import requests
+
+# Función para lanzar el triguer, token API v2 
+VOICE_MONKEY_TOKEN = "1806d0d32cdbe252c28f2a04991d0ff1_a0c9a2824a787b73a34068bccc2a454f"
+MONKEY_NAME = "felicidaddetectada"  # o el nombre exacto del Monkey creado
+
+def lanzar_monkey_trigger():
+    url = f"https://api.voicemonkey.io/trigger"
+    headers = {
+        "Authorization": f"Bearer {VOICE_MONKEY_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "monkey": MONKEY_NAME
+    }
+    response = requests.post(url, json=data, headers=headers)
+    print("Voice Monkey response:", response.status_code, response.text)
+
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -127,6 +146,10 @@ def prediccion():
 
     global ultima_emocion_detectada
     ultima_emocion_detectada = emocion_predicha
+
+    # Si es felicidad, lanza el trigger para que Alexa suene
+    if emocion_predicha == "felicidad":
+        lanzar_monkey_trigger()
 
     return jsonify({"emocion_detectada": emocion_predicha}), 200
 
