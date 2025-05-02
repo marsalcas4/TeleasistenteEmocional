@@ -12,3 +12,5 @@ soundfile
 joblib
 matplotlib
 seaborn
+requests
+
