@@ -46,15 +46,12 @@
   <div class="container">
     <h2 class="text-center mb-4">🎤 Detector de Emociones por Voz</h2>
 
-    <form id="formularioAudio">
-      <div class="mb-3">
-        <label for="audio" class="form-label">Sube tu archivo de audio (WAV o MP3):</label>
-        <input class="form-control" type="file" id="audio" name="audio" accept="audio/*" />
-      </div>
+    <div class="mb-3">
+      <label for="audio" class="form-label">Sube tu archivo de audio (WAV o MP3):</label>
+      <input class="form-control" type="file" id="audio" name="audio" accept="audio/*" />
+    </div>
 
-      <button type="submit" class="btn btn-primary" id="detectarBtn" disabled>Detectar Emoción</button>
-    </form>
-
+    <button class="btn btn-primary" id="detectarBtn">Detectar Emoción</button>
     <button class="btn btn-secondary" id="grabarBtn">🎧 Empezar grabación</button>
 
     <div id="resultado"></div>
@@ -64,50 +61,46 @@
   <div>
     <img src="{{ url_for('static', filename='imagenes/logo-us.png') }}" alt="Logo Universidad de Sevilla" class="logo">
   </div>
+
   <script>
     const grabarBtn = document.getElementById('grabarBtn');
     const detectarBtn = document.getElementById('detectarBtn');
-    const form = document.getElementById('formularioAudio');
     const audioInput = document.getElementById('audio');
     const resultado = document.getElementById('resultado');
-  
+
     let mediaRecorder;
     let audioChunks = [];
     let grabacionBlob = null;
-  
+
     grabarBtn.onclick = async () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
-  
+
       mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
       mediaRecorder.onstop = () => {
         grabacionBlob = new Blob(audioChunks, { type: 'audio/wav' });
         resultado.innerHTML = "<div class='alert alert-info'>✅ Grabación lista para enviar.</div>";
         grabarBtn.disabled = false;
-        detectarBtn.disabled = false;
       };
-  
+
       mediaRecorder.start();
       grabarBtn.disabled = true;
-      detectarBtn.disabled = false;
       resultado.innerHTML = "<div class='alert alert-info'>🎙️ Grabando... Pulsa 'Detectar Emoción' para detener y analizar.</div>";
     };
-  
-    detectarBtn.onclick = async (e) => {
-      e.preventDefault();
-  
+
+    detectarBtn.onclick = async () => {
       // Caso 1: Si está grabando
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
-        resultado.innerHTML = "<div class='alert alert-info'>⏳ Procesando grabación...</div>";
+        resultado.innerHTML = "<div class='alert alert-info'>⏳ Deteniendo grabación y procesando...</div>";
         return;
       }
-  
-      // Caso 2: No grabando. Revisar si hay archivo o grabación previa
+
+      // Caso 2: No está grabando. Revisamos archivo o grabación previa.
       const audioFile = audioInput.files[0];
       const formData = new FormData();
-  
+
       if (audioFile) {
         formData.append('audio', audioFile);
       } else if (grabacionBlob) {
@@ -116,20 +109,20 @@
         resultado.innerHTML = "<div class='alert alert-warning'>⚠️ Por favor, graba o sube un archivo de audio.</div>";
         return;
       }
-  
+
       resultado.innerHTML = "<div class='alert alert-info'>⏳ Analizando emoción...</div>";
       await enviarFormulario(formData);
     };
-  
+
     async function enviarFormulario(formData) {
       try {
         const res = await fetch('/prediccion', {
           method: 'POST',
           body: formData
         });
-  
+
         const data = await res.json();
-  
+
         if (res.ok) {
           resultado.innerHTML = `<div class="alert alert-success">🎧 Emoción detectada: <strong>${data.emocion_detectada}</strong></div>`;
         } else {
@@ -141,5 +134,6 @@
       }
     }
   </script>
-  </body>
+</body>
 </html>
+
