@@ -1,133 +1,104 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Detector de Emociones por Voz</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <style>
-    body {
-      background: #f0f4f8;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .container {
-      max-width: 600px;
-      margin-top: 80px;
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-    .btn {
-      width: 100%;
-    }
-    #resultado {
-      margin-top: 20px;
-      font-size: 1.25rem;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Detector de Emociones</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 20px; }
+        .contenedor {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 0 auto;
+        }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px; width: 100%; }
+        #resultado { margin-top: 20px; font-size: 18px; color: #333; }
+        
+        /* Estilo para los logos */
+        .logo {
+            width: 120px; /* Ajusta el tamaño de los logos */
+            height: auto;
+            margin: 10px;
+        }
+
+        /* Logo de ETSII arriba centrado */
+        .logo-etsii {
+            display: block;
+            margin: 20px auto 0 auto;
+        }
+
+        /* Logo de la Universidad de Sevilla abajo centrado */
+        .logo-us {
+            display: block;
+            margin: 20px auto 0 auto;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2 class="text-center mb-4">🎤 Detector de Emociones por Voz</h2>
+    <h1>🎙️ Detector de Emociones por Voz</h1>
 
-    <form id="formularioAudio">
-      <div class="mb-3">
-        <label for="audio" class="form-label">Sube un archivo de audio (opcional):</label>
-        <input class="form-control" type="file" id="audio" name="audio" accept="audio/*" />
-      </div>
-      <div class="mb-3 text-center">
-        <button type="button" id="grabar" class="btn btn-secondary mb-2">🎧 Empezar Grabación</button>
-        <button type="submit" id="detectar" class="btn btn-primary">⏹️ Detectar Emoción</button>
-      </div>
-    </form>
+    <!-- Logo de ETSII encima del cuadro de botones -->
+    <img class="logo logo-etsii" src="../imagenes/logo-etsii.png" alt="Logo Escuela Técnica Superior de Ingeniería Informática">
 
-    <div id="resultado"></div>
-  </div>
+    <!-- Contenedor con los botones -->
+    <div class="contenedor">
+        <button id="grabar">🎧 Empezar grabación</button>
+        <button id="detener" disabled>⏹️ Detener y enviar</button>
+        <p id="resultado">Resultado: —</p>
+    </div>
 
-  <script>
-    let mediaRecorder;
-    let audioChunks = [];
-    let grabando = false;
-    let blobGrabado = null;
+    <!-- Logo de la Universidad de Sevilla debajo del cuadro de botones -->
+    <img class="logo logo-us" src="../imagenes/logo-us.png" alt="Logo Universidad de Sevilla">
 
-    const grabarBtn = document.getElementById('grabar');
-    const detectarBtn = document.getElementById('detectar');
-    const form = document.getElementById('formularioAudio');
-    const resultado = document.getElementById('resultado');
-    const archivoInput = document.getElementById('audio');
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
 
-    grabarBtn.onclick = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
-      blobGrabado = null;
+        const grabarBtn = document.getElementById('grabar');
+        const detenerBtn = document.getElementById('detener');
+        const resultadoP = document.getElementById('resultado');
 
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        blobGrabado = new Blob(audioChunks, { type: 'audio/wav' });
-        resultado.innerHTML = "<div class='alert alert-info'>Grabación lista para enviar.</div>";
-      };
+        grabarBtn.onclick = async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
 
-      mediaRecorder.start();
-      grabando = true;
-      grabarBtn.disabled = true;
-      detectarBtn.textContent = "⏹️ Detener y Detectar Emoción";
-      resultado.innerHTML = "<div class='alert alert-warning'>🎙️ Grabando... habla ahora.</div>";
-    };
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = enviarAudio;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+            mediaRecorder.start();
+            grabarBtn.disabled = true;
+            detenerBtn.disabled = false;
+            resultadoP.textContent = 'Grabando...';
+        };
 
-      // Si estamos grabando, detenemos y esperamos a que termine
-      if (grabando && mediaRecorder.state === "recording") {
-        mediaRecorder.stop();
-        grabando = false;
-        grabarBtn.disabled = false;
-        detectarBtn.textContent = "⏹️ Detectar Emoción";
+        detenerBtn.onclick = () => {
+            mediaRecorder.stop();
+            grabarBtn.disabled = false;
+            detenerBtn.disabled = true;
+            resultadoP.textContent = 'Procesando...';
+        };
 
-        // Esperamos un poco a que termine mediaRecorder.onstop
-        setTimeout(() => {
-          enviarAudio(blobGrabado);
-        }, 500);
-        return;
-      }
+        function enviarAudio() {
+            const blob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', blob, 'grabacion.wav');
 
-      // Si hay archivo subido
-      const archivo = archivoInput.files[0];
-      if (archivo) {
-        enviarAudio(archivo);
-      } else if (blobGrabado) {
-        enviarAudio(blobGrabado);
-      } else {
-        resultado.innerHTML = "<div class='alert alert-warning'>Por favor, graba o sube un archivo.</div>";
-      }
-    });
-
-    async function enviarAudio(blob) {
-      resultado.innerHTML = "<div class='alert alert-info'>⏳ Analizando emoción...</div>";
-      const formData = new FormData();
-      formData.append('audio', blob, 'grabacion.wav');
-
-      try {
-        const res = await fetch('/prediccion', {
-          method: 'POST',
-          body: formData
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          resultado.innerHTML = `<div class="alert alert-success">🎧 Emoción detectada: <strong>${data.emocion_detectada}</strong></div>`;
-        } else {
-          resultado.innerHTML = `<div class="alert alert-danger">Error: ${data.error}</div>`;
+            fetch('https://teleasitente-emocional-160fa0a443c4.herokuapp.com/prediccion', {           
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                resultadoP.textContent = 'Resultado: ' + data.emocion_detectada;
+            })
+            .catch(err => {
+                console.error(err);
+                resultadoP.textContent = '❌ Error al enviar audio.';
+            });
         }
-      } catch (error) {
-        resultado.innerHTML = `<div class="alert alert-danger">❌ Error al procesar el audio.</div>`;
-        console.error(error);
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
