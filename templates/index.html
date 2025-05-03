@@ -78,10 +78,15 @@
       audioChunks = [];
 
       mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
+
+      mediaRecorder.onstop = async () => {
         grabacionBlob = new Blob(audioChunks, { type: 'audio/wav' });
         resultado.innerHTML = "<div class='alert alert-info'>✅ Grabación lista para enviar.</div>";
-        grabarBtn.disabled = false;
+
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1000ms
+        const formData = new FormData();
+        formData.append('audio', grabacionBlob, 'grabacion.wav');
+        enviarFormulario(formData);
       };
 
       mediaRecorder.start();
@@ -90,14 +95,13 @@
     };
 
     detectarBtn.onclick = async () => {
-      // Caso 1: Si está grabando
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
-        resultado.innerHTML = "<div class='alert alert-info'>⏳ Deteniendo grabación y procesando...</div>";
+        resultado.innerHTML = "<div class='alert alert-info'>⏳ Deteniendo grabación y preparando audio...</div>";
+        grabarBtn.disabled = false;
         return;
       }
 
-      // Caso 2: No está grabando. Revisamos archivo o grabación previa.
       const audioFile = audioInput.files[0];
       const formData = new FormData();
 
@@ -136,4 +140,5 @@
   </script>
 </body>
 </html>
+
 
