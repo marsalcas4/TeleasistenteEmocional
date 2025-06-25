@@ -1,3 +1,5 @@
+Keras
+tensorflow
 Flask
 Flask-Cors
 gunicorn
