@@ -14,11 +14,10 @@ CORS(app)
 
 # Cargar el modelo, scaler y el selector previamente entrenados
 #modelo_MLP = joblib.load("modelo_MLP.pkl")
-from tensorflow.keras.models import load_model
-modelo_MLP = load_model("modelo_MLP.keras")  # o "modelo_MLP.h5"
 
-scaler_MLP = joblib.load("scaler_MLP.pkl")
-selector_MLP = joblib.load("selector_MLP.pkl")
+modelo_RF = joblib.load("modelo_RF.pkl")
+scaler_RF = joblib.load("scaler_RF.pkl")
+selector_RF = joblib.load("selector_RF.pkl")
 
 # Diccionario de emociones
 diccionario_emociones = {
@@ -149,17 +148,17 @@ def prediccion():
 
     ruta_audio_wav = convertir_a_wav(ruta_audio)
     muestra = extraer_caracteristicas_voz(ruta_audio_wav)
-    
-    # Seleccionar las mejores características utilizando SelectKBest
-    muestra_seleccionada = selector_MLP.transform(muestra)
-                
+                    
     # Escalar las características
-    muestra_escalada = scaler_MLP.transform(muestra_seleccionada)
+    muestra_escalada = scaler_RF.transform(muestra)
   
+    # Seleccionar las mejores características utilizando SelectKBest
+    muestra_seleccionada = selector_RF.transform(muestra_escalada)
+
     # Realizar la predicción con el modelo MLP
-    pred = modelo_MLP.predict(muestra_escalada)
-    emocion_predicha = diccionario_emociones[np.argmax(pred[0])]
-    #emocion_predicha = diccionario_emociones[int(pred[0])]
+    pred = modelo_RF.predict(muestra_seleccionada)
+    #emocion_predicha = diccionario_emociones[np.argmax(pred[0])]
+    emocion_predicha = diccionario_emociones[int(pred[0])]
 
     global ultima_emocion_detectada
     ultima_emocion_detectada = emocion_predicha

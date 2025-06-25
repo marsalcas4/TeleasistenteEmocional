@@ -1,4 +1,3 @@
-xgboost
 Flask
 Flask-Cors
 gunicorn
