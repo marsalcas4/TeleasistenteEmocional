@@ -13,7 +13,10 @@ from flask_cors import CORS
 CORS(app)
 
 # Cargar el modelo, scaler y el selector previamente entrenados
-modelo_MLP = joblib.load("modelo_MLP.pkl")
+#modelo_MLP = joblib.load("modelo_MLP.pkl")
+from tensorflow.keras.models import load_model
+modelo_MLP = load_model("modelo_MLP.keras")  # o "modelo_MLP.h5"
+
 scaler_MLP = joblib.load("scaler_MLP.pkl")
 selector_MLP = joblib.load("selector_MLP.pkl")
 
