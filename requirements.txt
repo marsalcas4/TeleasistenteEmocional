@@ -1,3 +1,4 @@
+xgboost
 Flask
 Flask-Cors
 gunicorn
@@ -10,7 +11,5 @@ pandas
 scipy
 soundfile
 joblib
-matplotlib
-seaborn
 requests
 
