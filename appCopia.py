@@ -174,11 +174,5 @@ def obtener_ultima_emocion():
         return jsonify({"emocion": "desconocida"})
     return jsonify({"emocion": ultima_emocion_detectada})
 
-from flask import send_file
-
-@app.route('/audio_guardado')
-def audio_guardado():
-    return send_file('audio_recibido.wav', mimetype='audio/wav')
-
 if __name__ == '__main__':
     app.run()
