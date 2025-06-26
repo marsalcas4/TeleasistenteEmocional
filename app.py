@@ -29,7 +29,7 @@ diccionario_emociones = {
 
 # Variable global
 ultima_emocion_detectada = None
-ultimo_audio_bytes = None
+ultimo_audio = None
 
 import requests
 
@@ -144,15 +144,15 @@ def prediccion():
 
     archivo_audio = request.files['audio']
     ruta_audio = 'audio_recibido.wav'
-
-    # Guardar en memoria para depuración
-    global ultimo_audio_bytes
-    ultimo_audio_bytes = archivo_audio.read()
-    archivo_audio.stream.seek(0)  # Para poder seguir usándolo normalmente
-
+    
     archivo_audio.save(ruta_audio)
 
     ruta_audio_wav = convertir_a_wav(ruta_audio)
+   
+   # Guardar en memoria para depuración
+    global ultimo_audio
+    ultimo_audio = ruta_audio_wav 
+   
     muestra = extraer_caracteristicas_voz(ruta_audio_wav)
                     
     # Escalar las características
@@ -184,22 +184,10 @@ from flask import send_file
 
 @app.route('/audio_guardado')
 def audio_guardado():
-    return send_file('audio_recibido.wav', mimetype='audio/wav')
-
-import io
-
-@app.route('/debug_audio')
-def debug_audio():
-    global ultimo_audio_bytes
-    if ultimo_audio_bytes is None:
-        return "No hay audio recibido aún.", 404
-
-    return send_file(
-        io.BytesIO(ultimo_audio_bytes),
-        mimetype='audio/wav',
-        as_attachment=False,
-        download_name='debug_audio.wav'
-    )
+    global ultimo_audio
+    if ultimo_audio is None:
+        return "⚠️ No se ha recibido audio aún.", 404
+    return send_file(ultimo_audio, mimetype='audio/wav')
 
 
 if __name__ == '__main__':
