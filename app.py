@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_file
 from pydub import AudioSegment
 import librosa
 import numpy as np
 import joblib
 import scipy.stats
+import os
 
 # Crear la app de Flask
 app = Flask(__name__)
@@ -143,16 +144,14 @@ def prediccion():
         return jsonify({"error": "No se ha enviado un archivo de audio."}), 400
 
     archivo_audio = request.files['audio']
-    ruta_audio = 'audio_recibido.wav'
-    
+    ruta_audio = '/tmp/audio_recibido.wav'  
     archivo_audio.save(ruta_audio)
 
     ruta_audio_wav = convertir_a_wav(ruta_audio)
-   
-   # Guardar en memoria para depuración
+
     global ultimo_audio
-    ultimo_audio = ruta_audio_wav 
-   
+    ultimo_audio = ruta_audio_wav
+     
     muestra = extraer_caracteristicas_voz(ruta_audio_wav)
                     
     # Escalar las características
@@ -180,14 +179,12 @@ def obtener_ultima_emocion():
         return jsonify({"emocion": "desconocida"})
     return jsonify({"emocion": ultima_emocion_detectada})
 
-from flask import send_file
-
 @app.route('/audio_guardado')
 def audio_guardado():
-    global ultimo_audio
-    if ultimo_audio is None:
-        return "⚠️ No se ha recibido audio aún.", 404
-    return send_file(ultimo_audio, mimetype='audio/wav')
+    if os.path.exists('audio_convertido.wav'):
+        return send_file('audio_convertido.wav', mimetype='audio/wav')
+    else:
+        return jsonify({"error": "No hay audio guardado"}), 404
 
 
 if __name__ == '__main__':
