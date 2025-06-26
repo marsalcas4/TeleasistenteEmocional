@@ -15,9 +15,9 @@ CORS(app)
 # Cargar el modelo, scaler y el selector previamente entrenados
 #modelo_MLP = joblib.load("modelo_MLP.pkl")
 
-modelo_RF = joblib.load("modelo_RF.pkl")
-scaler_RF = joblib.load("scaler_RF.pkl")
-selector_RF = joblib.load("selector_RF.pkl")
+modelo = joblib.load("modelo_LGBM.pkl")
+scaler = joblib.load("scaler_LGBM.pkl")
+selector = joblib.load("selector_LGBM.pkl")
 
 # Diccionario de emociones
 diccionario_emociones = {
@@ -150,13 +150,13 @@ def prediccion():
     muestra = extraer_caracteristicas_voz(ruta_audio_wav)
                     
     # Escalar las características
-    muestra_escalada = scaler_RF.transform(muestra)
+    muestra_escalada = scaler.transform(muestra)
   
     # Seleccionar las mejores características utilizando SelectKBest
-    muestra_seleccionada = selector_RF.transform(muestra_escalada)
+    muestra_seleccionada = selector.transform(muestra_escalada)
 
     # Realizar la predicción con el modelo MLP
-    pred = modelo_RF.predict(muestra_seleccionada)
+    pred = modelo.predict(muestra_seleccionada)
     #emocion_predicha = diccionario_emociones[np.argmax(pred[0])]
     emocion_predicha = diccionario_emociones[int(pred[0])]
 
